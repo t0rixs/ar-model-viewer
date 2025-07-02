@@ -1,128 +1,9 @@
 // アプリケーションの主要な機能を実装するJavaScript
 
 document.addEventListener('DOMContentLoaded', function() {
-    // スマホ判定
-    const isMobile = window.innerWidth <= 768;
+    // モバイル対応のAR設定を初期化
+    initMobileARSettings();
     
-    // スマホ用スタイル強制適用関数
-    function forceMobileStyles() {
-        if (!isMobile) return;
-        
-        const scene = document.querySelector('a-scene');
-        const canvas = document.querySelector('a-scene canvas');
-        
-        if (scene) {
-            scene.style.cssText = `
-                width: 100vw !important;
-                height: 100vh !important;
-                max-width: 100vw !important;
-                max-height: 100vh !important;
-                position: fixed !important;
-                top: 0 !important;
-                left: 0 !important;
-                right: 0 !important;
-                bottom: 0 !important;
-                overflow: hidden !important;
-                margin: 0 !important;
-                padding: 0 !important;
-            `;
-        }
-        
-        if (canvas) {
-            canvas.style.cssText = `
-                width: 100vw !important;
-                height: 100vh !important;
-                max-width: 100vw !important;
-                max-height: 100vh !important;
-                position: fixed !important;
-                top: 0 !important;
-                left: 0 !important;
-                right: 0 !important;
-                bottom: 0 !important;
-                object-fit: cover !important;
-                object-position: center center !important;
-                transform: none !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                border: none !important;
-                outline: none !important;
-            `;
-        }
-    }
-    
-    // A-Frameの変更を監視するMutationObserver
-    function setupMobileStyleWatcher() {
-        if (!isMobile) return;
-        
-        const scene = document.querySelector('a-scene');
-        if (!scene) return;
-        
-        // 初回適用
-        forceMobileStyles();
-        
-        // MutationObserverでCanvasの変更を監視
-        const observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                if (mutation.type === 'childList' || mutation.type === 'attributes') {
-                    forceMobileStyles();
-                }
-            });
-        });
-        
-        // シーン全体を監視
-        observer.observe(scene, {
-            childList: true,
-            subtree: true,
-            attributes: true,
-            attributeFilter: ['style', 'width', 'height']
-        });
-        
-        // 定期的な強制適用（フォールバック） - より頻繁に
-        setInterval(forceMobileStyles, 100);
-        
-        // リサイズイベントをブロック
-        window.addEventListener('resize', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            setTimeout(forceMobileStyles, 10);
-        }, true);
-        
-        // A-Frameの内部イベントをブロック
-        scene.addEventListener('render-target-loaded', forceMobileStyles);
-        scene.addEventListener('renderstart', forceMobileStyles);
-        scene.addEventListener('loaded', forceMobileStyles);
-        
-        // Canvasのサイズ変更を監視
-        const canvasResizeObserver = new ResizeObserver(function(entries) {
-            console.log('Canvas サイズ変更を検出:', entries);
-            forceMobileStyles();
-        });
-        
-        // Canvas要素が見つかったら ResizeObserver を設定
-        function setupCanvasObserver() {
-            const canvas = document.querySelector('a-scene canvas');
-            if (canvas) {
-                try {
-                    canvasResizeObserver.observe(canvas);
-                    console.log('Canvas ResizeObserver を設定しました');
-                } catch (e) {
-                    console.log('ResizeObserver 設定エラー:', e);
-                }
-            }
-        }
-        
-        // Canvas検索を定期的に実行
-        const canvasSearchInterval = setInterval(function() {
-            const canvas = document.querySelector('a-scene canvas');
-            if (canvas) {
-                setupCanvasObserver();
-                clearInterval(canvasSearchInterval);
-            }
-        }, 100);
-        
-        console.log('スマホ用スタイル監視を開始しました');
-    }
-
     // 要素の取得
     const loadingScreen = document.getElementById('loading-screen');
     const instructions = document.getElementById('instructions');
@@ -132,43 +13,28 @@ document.addEventListener('DOMContentLoaded', function() {
     // ARシーンが読み込まれたらローディング画面を非表示
     const scene = document.querySelector('a-scene');
     scene.addEventListener('loaded', function () {
-        console.log('A-Frameシーンが読み込まれました');
-        
-        // スマホ用スタイル監視を開始
-        setupMobileStyleWatcher();
+        // カメラ映像のサイズ調整
+        adjustCameraVideo();
         
         setTimeout(() => {
             loadingScreen.classList.add('hidden');
-            // スマホ用スタイルを再適用
-            forceMobileStyles();
-            
             // デバッグパネルの初期化（PC限定）- 少し遅延させてエンティティが確実に読み込まれるのを待つ
             setTimeout(() => {
                 initDebugPanel();
-                // スマホ用スタイルを再度適用
-                forceMobileStyles();
             }, 500);
         }, 1000);
     });
-    
-    // Canvasが追加されたときも監視
-    const canvasObserver = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-            if (mutation.addedNodes) {
-                mutation.addedNodes.forEach(function(node) {
-                    if (node.tagName === 'CANVAS') {
-                        console.log('新しいCanvasが検出されました');
-                        setTimeout(forceMobileStyles, 100);
-                    }
-                });
-            }
-        });
+
+    // リサイズ時の対応
+    window.addEventListener('resize', function() {
+        adjustCameraVideo();
     });
-    
-    // bodyの変更を監視してCanvasの追加を検出
-    canvasObserver.observe(document.body, {
-        childList: true,
-        subtree: true
+
+    // 画面回転時の対応
+    window.addEventListener('orientationchange', function() {
+        setTimeout(() => {
+            adjustCameraVideo();
+        }, 100);
     });
 
     // カメラアクセスエラー時の処理
@@ -202,6 +68,73 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('オフラインになりました');
         // オフラインモードの通知を表示するなどの処理を追加可能
     });
+
+    // モバイル対応のAR設定を初期化
+    function initMobileARSettings() {
+        const scene = document.querySelector('a-scene');
+        if (!scene) return;
+
+        // 画面サイズを取得
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        const isMobile = width <= 768;
+        
+        console.log(`画面サイズ: ${width}x${height}, モバイル: ${isMobile}`);
+        
+        // モバイル用の最適化設定
+        if (isMobile) {
+            // モバイル向けの解像度設定
+            const sourceWidth = Math.min(width, 640);
+            const sourceHeight = Math.min(height, 480);
+            
+            const arjsConfig = {
+                trackingMethod: 'best',
+                sourceType: 'webcam',
+                sourceWidth: sourceWidth,
+                sourceHeight: sourceHeight,
+                displayWidth: width,
+                displayHeight: height,
+                debugUIEnabled: false
+            };
+            
+            // AR.jsの設定を更新
+            const arjsString = Object.entries(arjsConfig)
+                .map(([key, value]) => `${key}: ${value}`)
+                .join('; ');
+            
+            scene.setAttribute('arjs', arjsString);
+            console.log('モバイル用AR設定を適用:', arjsString);
+        }
+    }
+
+    // カメラ映像のサイズ調整
+    function adjustCameraVideo() {
+        const scene = document.querySelector('a-scene');
+        const canvas = scene ? scene.querySelector('canvas') : null;
+        
+        if (!canvas) return;
+        
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        
+        // canvasのサイズを強制的に画面サイズに合わせる
+        canvas.style.width = width + 'px';
+        canvas.style.height = height + 'px';
+        canvas.style.maxWidth = width + 'px';
+        canvas.style.maxHeight = height + 'px';
+        canvas.style.minWidth = width + 'px';
+        canvas.style.minHeight = height + 'px';
+        canvas.style.objectFit = 'cover';
+        canvas.style.objectPosition = 'center';
+        canvas.style.transform = 'none';
+        canvas.style.position = 'fixed';
+        canvas.style.top = '0';
+        canvas.style.left = '0';
+        canvas.style.right = '0';
+        canvas.style.bottom = '0';
+        
+        console.log(`カメラ映像サイズ調整: ${width}x${height}`);
+    }
 
     // デバッグパネルの初期化（PC限定）
     function initDebugPanel() {

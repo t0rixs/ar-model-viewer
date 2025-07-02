@@ -240,15 +240,13 @@ a-scene canvas {
         bottom: 0 !important;
         margin: 0 !important;
         padding: 0 !important;
-        object-fit: cover !important;
+                 object-fit: cover !important;
         object-position: center !important;
         max-width: none !important;
         max-height: none !important;
         min-width: 100vw !important;
         min-height: 100vh !important;
         transform: none !important;
-        object-position: center;
-        transform: none;
         margin: 0;
         padding: 0;
     }
