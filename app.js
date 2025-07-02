@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const loadingScreen = document.getElementById('loading-screen');
     const instructions = document.getElementById('instructions');
     const closeInstructionsBtn = document.getElementById('close-instructions');
-    const toggleModelBtn = document.getElementById('toggle-model');
     
     // ARシーンが読み込まれたらローディング画面を非表示
     const scene = document.querySelector('a-scene');
@@ -21,6 +20,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // デバッグパネルの初期化（PC限定）- 少し遅延させてエンティティが確実に読み込まれるのを待つ
             setTimeout(() => {
                 initDebugPanel();
+                // スマホ用コントロールパネルの初期化
+                initMobileControls();
             }, 500);
         }, 1000);
     });
@@ -314,5 +315,135 @@ document.addEventListener('DOMContentLoaded', function() {
             
             console.log('モデルをリセットしました');
         }
+    }
+
+    // スマホ用コントロールパネルの初期化
+    function initMobileControls() {
+        const isMobile = window.innerWidth <= 1023;
+        if (!isMobile) return;
+
+        console.log('スマホ用コントロールパネルを初期化中...');
+        
+        const arModel = document.getElementById('ar-model');
+        if (!arModel) {
+            console.log('ARモデルが見つかりません');
+            return;
+        }
+
+        // UI要素の取得
+        const toggleBtn = document.getElementById('toggle-mobile-controls');
+        const controlPanel = document.getElementById('mobile-control-panel');
+        const closeBtn = document.getElementById('close-mobile-controls');
+        const resetBtn = document.getElementById('mobile-reset');
+        const hideBtn = document.getElementById('mobile-hide-model');
+
+        if (!toggleBtn || !controlPanel || !closeBtn) {
+            console.log('モバイルコントロール要素が見つかりません');
+            return;
+        }
+
+        // パネルの開閉機能
+        toggleBtn.addEventListener('click', function() {
+            controlPanel.classList.toggle('hidden');
+        });
+
+        closeBtn.addEventListener('click', function() {
+            controlPanel.classList.add('hidden');
+        });
+
+        // モデルの表示状態管理
+        let modelVisible = true;
+
+        // Position スライダーの設定
+        setupMobileSlider('mobile-pos-x', 'mobile-pos-x-value', 'position', 'x');
+        setupMobileSlider('mobile-pos-y', 'mobile-pos-y-value', 'position', 'y');
+        setupMobileSlider('mobile-pos-z', 'mobile-pos-z-value', 'position', 'z');
+
+        // Scale スライダーの設定
+        setupMobileSlider('mobile-scale-x', 'mobile-scale-x-value', 'scale', 'x');
+        setupMobileSlider('mobile-scale-y', 'mobile-scale-y-value', 'scale', 'y');
+        setupMobileSlider('mobile-scale-z', 'mobile-scale-z-value', 'scale', 'z');
+
+        // 全体スケール調整
+        const scaleAllSlider = document.getElementById('mobile-scale-all');
+        const scaleAllValue = document.getElementById('mobile-scale-all-value');
+        
+        scaleAllSlider.addEventListener('input', function() {
+            const value = parseFloat(this.value);
+            scaleAllValue.textContent = value.toFixed(1);
+            
+            // X, Y, Z全てを同じ値に設定
+            updateModelProperty('scale', 'x', value);
+            updateModelProperty('scale', 'y', value);
+            updateModelProperty('scale', 'z', value);
+            
+            // 個別スライダーも同期
+            document.getElementById('mobile-scale-x').value = value;
+            document.getElementById('mobile-scale-y').value = value;
+            document.getElementById('mobile-scale-z').value = value;
+            document.getElementById('mobile-scale-x-value').textContent = value.toFixed(1);
+            document.getElementById('mobile-scale-y-value').textContent = value.toFixed(1);
+            document.getElementById('mobile-scale-z-value').textContent = value.toFixed(1);
+        });
+
+        // リセット機能
+        resetBtn.addEventListener('click', function() {
+            // デフォルト値に戻す
+            const defaults = {
+                position: { x: 0.2, y: 0.7, z: 2.6 },
+                scale: { x: 2.0, y: 2.0, z: 2.0 }
+            };
+
+            // モデルを更新
+            arModel.setAttribute('position', `${defaults.position.x} ${defaults.position.y} ${defaults.position.z}`);
+            arModel.setAttribute('scale', `${defaults.scale.x} ${defaults.scale.y} ${defaults.scale.z}`);
+
+            // スライダーを更新
+            updateSliderValue('mobile-pos-x', 'mobile-pos-x-value', defaults.position.x);
+            updateSliderValue('mobile-pos-y', 'mobile-pos-y-value', defaults.position.y);
+            updateSliderValue('mobile-pos-z', 'mobile-pos-z-value', defaults.position.z);
+            updateSliderValue('mobile-scale-x', 'mobile-scale-x-value', defaults.scale.x);
+            updateSliderValue('mobile-scale-y', 'mobile-scale-y-value', defaults.scale.y);
+            updateSliderValue('mobile-scale-z', 'mobile-scale-z-value', defaults.scale.z);
+            updateSliderValue('mobile-scale-all', 'mobile-scale-all-value', defaults.scale.x);
+
+            console.log('モデルをリセットしました');
+        });
+
+        // 表示/非表示切り替え
+        hideBtn.addEventListener('click', function() {
+            modelVisible = !modelVisible;
+            arModel.setAttribute('visible', modelVisible);
+            hideBtn.textContent = modelVisible ? '非表示' : '表示';
+            hideBtn.style.background = modelVisible ? '#e74c3c' : '#27ae60';
+            console.log(`モデル表示: ${modelVisible}`);
+        });
+
+        // スライダー設定のヘルパー関数
+        function setupMobileSlider(sliderId, valueId, property, axis) {
+            const slider = document.getElementById(sliderId);
+            const valueSpan = document.getElementById(valueId);
+            
+            if (!slider || !valueSpan) return;
+
+            slider.addEventListener('input', function() {
+                const value = parseFloat(this.value);
+                valueSpan.textContent = value.toFixed(1);
+                updateModelProperty(property, axis, value);
+            });
+        }
+
+        // スライダー値更新のヘルパー関数
+        function updateSliderValue(sliderId, valueId, value) {
+            const slider = document.getElementById(sliderId);
+            const valueSpan = document.getElementById(valueId);
+            
+            if (slider && valueSpan) {
+                slider.value = value;
+                valueSpan.textContent = value.toFixed(1);
+            }
+        }
+
+        console.log('スマホ用コントロールパネルの初期化完了');
     }
 });
