@@ -180,13 +180,56 @@ document.addEventListener('DOMContentLoaded', function() {
     const marker = document.querySelector('a-marker');
     marker.addEventListener('markerFound', function() {
         console.log('マーカーを検出しました');
-        // マーカー検出時に追加のアニメーションなどを実装可能
+        // ar-modelの可視性を確認
+        const arModel = document.getElementById('ar-model');
+        if (arModel) {
+            console.log('ar-model 状態:', {
+                visible: arModel.getAttribute('visible'),
+                position: arModel.getAttribute('position'),
+                scale: arModel.getAttribute('scale'),
+                model: arModel.getAttribute('gltf-model')
+            });
+        }
     });
 
     // マーカーを見失ったときの処理
     marker.addEventListener('markerLost', function() {
         console.log('マーカーを見失いました');
     });
+
+    // モデルロードイベントの監視
+    const arModel = document.getElementById('ar-model');
+    if (arModel) {
+        // モデルロード成功時
+        arModel.addEventListener('model-loaded', function() {
+            console.log('poop.glb モデルがロードされました');
+            console.log('モデル情報:', {
+                position: this.getAttribute('position'),
+                rotation: this.getAttribute('rotation'),
+                scale: this.getAttribute('scale'),
+                visible: this.getAttribute('visible')
+            });
+        });
+
+        // モデルロードエラー時
+        arModel.addEventListener('model-error', function(evt) {
+            console.error('poop.glb モデルのロードに失敗しました:', evt.detail);
+        });
+
+        // エンティティロード時
+        arModel.addEventListener('loaded', function() {
+            console.log('ar-model エンティティがロードされました');
+            
+            // モデルファイルの存在確認
+            const modelSrc = this.getAttribute('gltf-model');
+            console.log('ロード対象モデル:', modelSrc);
+            
+            // 強制的に可視化（デバッグ用）
+            this.setAttribute('visible', true);
+        });
+    } else {
+        console.error('ar-model エンティティが見つかりません');
+    }
 
     // 説明を閉じるボタンの処理
     closeInstructionsBtn.addEventListener('click', function() {
@@ -260,7 +303,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // 可視領域の設定
         let visibleAreaConfig = {
-            size: 2.0,  // 可視領域のサイズ (m)
+            size: 10.0,  // 可視領域のサイズ (m) - 初期位置がカバーされるよう大きく設定
             showBoundary: true,  // 境界表示フラグ
             monitoringEnabled: true  // 位置監視フラグ
         };
@@ -403,9 +446,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const showVisibleAreaCheckbox = document.getElementById('show-visible-area');
             
             if (visibleAreaSizeSlider && visibleAreaValueSpan) {
-                visibleAreaSizeSlider.value = 2.0;
-                visibleAreaValueSpan.textContent = '2.0';
-                updateVisibleAreaSize(2.0);
+                visibleAreaSizeSlider.value = 10.0;
+                visibleAreaValueSpan.textContent = '10.0';
+                updateVisibleAreaSize(10.0);
             }
             
             if (showVisibleAreaCheckbox) {
@@ -481,11 +524,17 @@ document.addEventListener('DOMContentLoaded', function() {
         // ar-modelの可視性をチェック
         function checkModelVisibility() {
             const arModel = document.getElementById('ar-model');
-            if (!arModel) return;
+            if (!arModel) {
+                console.warn('ar-model が見つかりません');
+                return;
+            }
             
             // モデルの現在位置を取得
             const position = arModel.getAttribute('position');
-            if (!position) return;
+            if (!position) {
+                console.warn('ar-model の position が取得できません');
+                return;
+            }
             
             // マーカー中心（0,0）からの距離を計算（XZ平面）
             const distanceFromCenter = Math.sqrt(position.x * position.x + position.z * position.z);
@@ -493,13 +542,16 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // 可視領域内かどうかを判定
             const isVisible = distanceFromCenter <= halfAreaSize;
+            const currentVisibility = arModel.getAttribute('visible');
             
             // モデルの可視性を更新
-            if (arModel.getAttribute('visible') !== isVisible) {
+            if (currentVisibility !== isVisible) {
                 arModel.setAttribute('visible', isVisible);
-                console.log('モデル可視性変更:', isVisible ? '表示' : '非表示', 
-                           '距離:', distanceFromCenter.toFixed(2) + 'm', 
-                           '領域:', halfAreaSize.toFixed(2) + 'm');
+                console.log('🔄 モデル可視性変更:', isVisible ? '✅ 表示' : '❌ 非表示');
+                console.log('📍 現在位置:', `(${position.x.toFixed(2)}, ${position.y.toFixed(2)}, ${position.z.toFixed(2)})`);
+                console.log('📏 中心からの距離:', distanceFromCenter.toFixed(2) + 'm');
+                console.log('🎯 可視領域半径:', halfAreaSize.toFixed(2) + 'm');
+                console.log('📐 判定:', distanceFromCenter <= halfAreaSize ? '範囲内' : '範囲外');
             }
         }
     }
