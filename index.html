@@ -37,13 +37,13 @@
         
         <!-- デフォルトの3Dモデル（赤い箱） -->
          <a-marker preset="hiro">
-            <a-entity id="ar-model" position="2 0.7 4.4" rotation="270 0 0" scale="2 2 2" gltf-model="./models/poop.glb"></a-entity>
+            <a-entity id="ar-model" position="0.2 0.7 0.5" rotation="270 0 0" scale="2 2 2" gltf-model="./models/poop.glb"></a-entity>
             <!-- 可視領域の境界を表示するための平面 -->
             <a-plane id="visible-area-boundary" 
                      position="0 0.01 0" 
                      rotation="-90 0 0" 
-                     width="10" 
-                     height="10" 
+                     width="2" 
+                     height="2" 
                      color="rgba(0, 255, 0, 0.2)" 
                      material="transparent: true; opacity: 0.2; side: double"
                      visible="true">
@@ -61,16 +61,16 @@
             <div class="control-group">
                 <h4>Position</h4>
                 <div class="slider-group">
-                    <label>X: <span id="pos-x-value">2</span></label>
-                    <input type="range" id="pos-x" min="-10" max="10" step="0.1" value="2">
+                    <label>X: <span id="pos-x-value">0.2</span></label>
+                    <input type="range" id="pos-x" min="-10" max="10" step="0.1" value="0.2">
                 </div>
                 <div class="slider-group">
                     <label>Y: <span id="pos-y-value">0.7</span></label>
                     <input type="range" id="pos-y" min="-10" max="10" step="0.1" value="0.7">
                 </div>
                 <div class="slider-group">
-                    <label>Z: <span id="pos-z-value">4.4</span></label>
-                    <input type="range" id="pos-z" min="-10" max="10" step="0.1" value="4.4">
+                    <label>Z: <span id="pos-z-value">0.5</span></label>
+                    <input type="range" id="pos-z" min="-10" max="10" step="0.1" value="0.5">
                 </div>
             </div>
 
@@ -95,8 +95,8 @@
             <div class="control-group">
                 <h4>可視領域設定</h4>
                 <div class="slider-group">
-                    <label>領域サイズ: <span id="visible-area-value">10.0</span>m</label>
-                    <input type="range" id="visible-area-size" min="0.5" max="20" step="0.1" value="10.0">
+                    <label>領域サイズ: <span id="visible-area-value">2.0</span>m</label>
+                    <input type="range" id="visible-area-size" min="0.5" max="10" step="0.1" value="2.0">
                 </div>
                 <div class="checkbox-group">
                     <label>
