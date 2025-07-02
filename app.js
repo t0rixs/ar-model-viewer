@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', function() {
     scene.addEventListener('loaded', function () {
         setTimeout(() => {
             loadingScreen.classList.add('hidden');
+            // デバッグパネルの初期化（PC限定）
+            initDebugPanel();
         }, 1000);
     });
 
@@ -46,4 +48,149 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('オフラインになりました');
         // オフラインモードの通知を表示するなどの処理を追加可能
     });
+
+    // デバッグパネルの初期化（PC限定）
+    function initDebugPanel() {
+        // PC画面でない場合は何もしない
+        if (window.innerWidth < 1024) return;
+
+        const arModel = document.getElementById('ar-model');
+        if (!arModel) return;
+
+        // デバッグコントロールの要素を取得
+        const debugPanel = document.getElementById('debug-panel');
+        const toggleDebugBtn = document.getElementById('toggle-debug');
+        const debugControls = document.getElementById('debug-controls');
+        const resetBtn = document.getElementById('reset-model');
+
+        // デフォルト値
+        const defaultValues = {
+            position: { x: 0, y: 0, z: 0 },
+            rotation: { x: 90, y: 0, z: 0 },
+            scale: { x: 0.3, y: 0.3, z: 0.3 }
+        };
+
+        // 折りたたみ機能
+        toggleDebugBtn.addEventListener('click', function() {
+            debugControls.classList.toggle('collapsed');
+            toggleDebugBtn.textContent = debugControls.classList.contains('collapsed') ? '▼' : '▲';
+        });
+
+        // スライダーのイベントリスナーを設定
+        setupSliderListeners();
+
+        // リセットボタンの処理
+        resetBtn.addEventListener('click', function() {
+            resetToDefaults();
+        });
+
+        function setupSliderListeners() {
+            // Position スライダー
+            const posX = document.getElementById('pos-x');
+            const posY = document.getElementById('pos-y');
+            const posZ = document.getElementById('pos-z');
+            const posXValue = document.getElementById('pos-x-value');
+            const posYValue = document.getElementById('pos-y-value');
+            const posZValue = document.getElementById('pos-z-value');
+
+            // Rotation スライダー
+            const rotX = document.getElementById('rot-x');
+            const rotY = document.getElementById('rot-y');
+            const rotZ = document.getElementById('rot-z');
+            const rotXValue = document.getElementById('rot-x-value');
+            const rotYValue = document.getElementById('rot-y-value');
+            const rotZValue = document.getElementById('rot-z-value');
+
+            // Scale スライダー
+            const scaleX = document.getElementById('scale-x');
+            const scaleY = document.getElementById('scale-y');
+            const scaleZ = document.getElementById('scale-z');
+            const scaleXValue = document.getElementById('scale-x-value');
+            const scaleYValue = document.getElementById('scale-y-value');
+            const scaleZValue = document.getElementById('scale-z-value');
+
+            // Position スライダーのイベント
+            posX.addEventListener('input', function() {
+                posXValue.textContent = this.value;
+                updateModelProperty('position', 'x', parseFloat(this.value));
+            });
+
+            posY.addEventListener('input', function() {
+                posYValue.textContent = this.value;
+                updateModelProperty('position', 'y', parseFloat(this.value));
+            });
+
+            posZ.addEventListener('input', function() {
+                posZValue.textContent = this.value;
+                updateModelProperty('position', 'z', parseFloat(this.value));
+            });
+
+            // Rotation スライダーのイベント
+            rotX.addEventListener('input', function() {
+                rotXValue.textContent = this.value;
+                updateModelProperty('rotation', 'x', parseFloat(this.value));
+            });
+
+            rotY.addEventListener('input', function() {
+                rotYValue.textContent = this.value;
+                updateModelProperty('rotation', 'y', parseFloat(this.value));
+            });
+
+            rotZ.addEventListener('input', function() {
+                rotZValue.textContent = this.value;
+                updateModelProperty('rotation', 'z', parseFloat(this.value));
+            });
+
+            // Scale スライダーのイベント
+            scaleX.addEventListener('input', function() {
+                scaleXValue.textContent = this.value;
+                updateModelProperty('scale', 'x', parseFloat(this.value));
+            });
+
+            scaleY.addEventListener('input', function() {
+                scaleYValue.textContent = this.value;
+                updateModelProperty('scale', 'y', parseFloat(this.value));
+            });
+
+            scaleZ.addEventListener('input', function() {
+                scaleZValue.textContent = this.value;
+                updateModelProperty('scale', 'z', parseFloat(this.value));
+            });
+        }
+
+        function updateModelProperty(property, axis, value) {
+            const currentProperty = arModel.getAttribute(property);
+            currentProperty[axis] = value;
+            arModel.setAttribute(property, currentProperty);
+        }
+
+        function resetToDefaults() {
+            // スライダーの値をリセット
+            document.getElementById('pos-x').value = defaultValues.position.x;
+            document.getElementById('pos-y').value = defaultValues.position.y;
+            document.getElementById('pos-z').value = defaultValues.position.z;
+            document.getElementById('rot-x').value = defaultValues.rotation.x;
+            document.getElementById('rot-y').value = defaultValues.rotation.y;
+            document.getElementById('rot-z').value = defaultValues.rotation.z;
+            document.getElementById('scale-x').value = defaultValues.scale.x;
+            document.getElementById('scale-y').value = defaultValues.scale.y;
+            document.getElementById('scale-z').value = defaultValues.scale.z;
+
+            // 表示値を更新
+            document.getElementById('pos-x-value').textContent = defaultValues.position.x;
+            document.getElementById('pos-y-value').textContent = defaultValues.position.y;
+            document.getElementById('pos-z-value').textContent = defaultValues.position.z;
+            document.getElementById('rot-x-value').textContent = defaultValues.rotation.x;
+            document.getElementById('rot-y-value').textContent = defaultValues.rotation.y;
+            document.getElementById('rot-z-value').textContent = defaultValues.rotation.z;
+            document.getElementById('scale-x-value').textContent = defaultValues.scale.x;
+            document.getElementById('scale-y-value').textContent = defaultValues.scale.y;
+            document.getElementById('scale-z-value').textContent = defaultValues.scale.z;
+
+            // 3Dモデルを初期状態に戻す
+            arModel.setAttribute('position', defaultValues.position);
+            arModel.setAttribute('rotation', defaultValues.rotation);
+            arModel.setAttribute('scale', defaultValues.scale);
+        }
+    }
 });

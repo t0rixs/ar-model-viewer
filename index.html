@@ -36,9 +36,71 @@
         
         <!-- デフォルトの3Dモデル（赤い箱） -->
          <a-marker preset="hiro">
-            <a-entity position="0 0 0" rotation="90 0 0" scale="0.3 0.3 0.3" gltf-model="./models/poop.glb"></a-entity> 
+            <a-entity id="ar-model" position="0 0 0" rotation="90 0 0" scale="0.3 0.3 0.3" gltf-model="./models/poop.glb"></a-entity> 
          </a-marker>
     </a-scene>
+
+    <!-- デバッグパネル（PC限定） -->
+    <div id="debug-panel" class="debug-panel">
+        <h3>デバッグコントロール</h3>
+        <button id="toggle-debug" class="toggle-debug-btn">▼</button>
+        
+        <div id="debug-controls" class="debug-controls">
+            <!-- Position Controls -->
+            <div class="control-group">
+                <h4>Position</h4>
+                <div class="slider-group">
+                    <label>X: <span id="pos-x-value">0</span></label>
+                    <input type="range" id="pos-x" min="-5" max="5" step="0.1" value="0">
+                </div>
+                <div class="slider-group">
+                    <label>Y: <span id="pos-y-value">0</span></label>
+                    <input type="range" id="pos-y" min="-5" max="5" step="0.1" value="0">
+                </div>
+                <div class="slider-group">
+                    <label>Z: <span id="pos-z-value">0</span></label>
+                    <input type="range" id="pos-z" min="-5" max="5" step="0.1" value="0">
+                </div>
+            </div>
+
+            <!-- Rotation Controls -->
+            <div class="control-group">
+                <h4>Rotation</h4>
+                <div class="slider-group">
+                    <label>X: <span id="rot-x-value">90</span>°</label>
+                    <input type="range" id="rot-x" min="0" max="360" step="1" value="90">
+                </div>
+                <div class="slider-group">
+                    <label>Y: <span id="rot-y-value">0</span>°</label>
+                    <input type="range" id="rot-y" min="0" max="360" step="1" value="0">
+                </div>
+                <div class="slider-group">
+                    <label>Z: <span id="rot-z-value">0</span>°</label>
+                    <input type="range" id="rot-z" min="0" max="360" step="1" value="0">
+                </div>
+            </div>
+
+            <!-- Scale Controls -->
+            <div class="control-group">
+                <h4>Scale</h4>
+                <div class="slider-group">
+                    <label>X: <span id="scale-x-value">0.3</span></label>
+                    <input type="range" id="scale-x" min="0.1" max="2" step="0.1" value="0.3">
+                </div>
+                <div class="slider-group">
+                    <label>Y: <span id="scale-y-value">0.3</span></label>
+                    <input type="range" id="scale-y" min="0.1" max="2" step="0.1" value="0.3">
+                </div>
+                <div class="slider-group">
+                    <label>Z: <span id="scale-z-value">0.3</span></label>
+                    <input type="range" id="scale-z" min="0.1" max="2" step="0.1" value="0.3">
+                </div>
+            </div>
+
+            <!-- Reset Button -->
+            <button id="reset-model" class="reset-btn">リセット</button>
+        </div>
+    </div>
 
     <script src="app.js?v=20250515"></script>
     <script>
