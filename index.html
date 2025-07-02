@@ -31,7 +31,9 @@
     <a-scene embedded arjs="trackingMethod: best; sourceType: webcam; sourceWidth: 1280; sourceHeight: 720; displayWidth: 1280; displayHeight: 720; debugUIEnabled: false;"
              renderer="logarithmicDepthBuffer: true; antialias: true; precision: mediump;"
              vr-mode-ui="enabled: false"
-             style="width: 100vw; height: 100vh; position: fixed; top: 0; left: 0;">
+             device-orientation-permission-ui="enabled: false"
+             style="width: 100vw; height: 100vh; position: fixed; top: 0; left: 0;"
+             camera-listener="true">
         <!-- カメラ -->
         <a-entity camera></a-entity>
         

@@ -1,6 +1,52 @@
 // アプリケーションの主要な機能を実装するJavaScript
 
 document.addEventListener('DOMContentLoaded', function() {
+    // 画面サイズ監視デバッグ
+    function debugScreenSize() {
+        console.log('=== 画面サイズデバッグ ===');
+        console.log('window.innerWidth:', window.innerWidth);
+        console.log('window.outerWidth:', window.outerWidth);
+        console.log('screen.width:', screen.width);
+        console.log('document.documentElement.clientWidth:', document.documentElement.clientWidth);
+        console.log('window.devicePixelRatio:', window.devicePixelRatio);
+        console.log('ユーザーエージェント:', navigator.userAgent);
+        
+        // メディアクエリの状態をチェック
+        if (window.matchMedia) {
+            console.log('480px以下:', window.matchMedia('(max-width: 480px)').matches);
+            console.log('768px以下:', window.matchMedia('(max-width: 768px)').matches);
+            console.log('1024px以上:', window.matchMedia('(min-width: 1024px)').matches);
+        }
+        console.log('======================');
+    }
+
+    // 初期状態をログ
+    debugScreenSize();
+
+    // リサイズ監視
+    let resizeTimeout;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            console.log('リサイズイベント発生');
+            debugScreenSize();
+        }, 100);
+    });
+
+    // A-Frameの初期化を監視
+    const scene = document.querySelector('a-scene');
+    if (scene) {
+        scene.addEventListener('renderstart', function() {
+            console.log('A-Frame renderstart イベント');
+            setTimeout(debugScreenSize, 100);
+        });
+        
+        scene.addEventListener('loaded', function() {
+            console.log('A-Frame loaded イベント');
+            setTimeout(debugScreenSize, 100);
+        });
+    }
+
     // 要素の取得
     const loadingScreen = document.getElementById('loading-screen');
     const instructions = document.getElementById('instructions');
@@ -8,12 +54,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const toggleModelBtn = document.getElementById('toggle-model');
     
     // ARシーンが読み込まれたらローディング画面を非表示
-    const scene = document.querySelector('a-scene');
     scene.addEventListener('loaded', function () {
         setTimeout(() => {
             loadingScreen.classList.add('hidden');
             // デバッグパネルの初期化（PC限定）- 少し遅延させてエンティティが確実に読み込まれるのを待つ
             setTimeout(() => {
+                console.log('デバッグパネル初期化前の画面サイズチェック');
+                debugScreenSize();
                 initDebugPanel();
             }, 500);
         }, 1000);
