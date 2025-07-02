@@ -101,9 +101,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // デフォルト値
         const defaultValues = {
-            position: { x: 0, y: 0, z: 0 },
-            rotation: { x: 90, y: 0, z: 0 },
-            scale: { x: 0.3, y: 0.3, z: 0.3 }
+            position: { x: 2, y: 0.7, z: 4.4 },
+            rotation: { x: 270, y: 0, z: 0 },
+            scale: { x: 2, y: 2, z: 2 }
         };
 
         // 折りたたみ機能
@@ -129,13 +129,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const posYValue = document.getElementById('pos-y-value');
             const posZValue = document.getElementById('pos-z-value');
 
-            // Rotation スライダー
-            const rotX = document.getElementById('rot-x');
-            const rotY = document.getElementById('rot-y');
-            const rotZ = document.getElementById('rot-z');
-            const rotXValue = document.getElementById('rot-x-value');
-            const rotYValue = document.getElementById('rot-y-value');
-            const rotZValue = document.getElementById('rot-z-value');
 
             // Scale スライダー
             const scaleX = document.getElementById('scale-x');
@@ -159,22 +152,6 @@ document.addEventListener('DOMContentLoaded', function() {
             posZ.addEventListener('input', function() {
                 posZValue.textContent = this.value;
                 updateModelProperty('position', 'z', parseFloat(this.value));
-            });
-
-            // Rotation スライダーのイベント
-            rotX.addEventListener('input', function() {
-                rotXValue.textContent = this.value;
-                updateModelProperty('rotation', 'x', parseFloat(this.value));
-            });
-
-            rotY.addEventListener('input', function() {
-                rotYValue.textContent = this.value;
-                updateModelProperty('rotation', 'y', parseFloat(this.value));
-            });
-
-            rotZ.addEventListener('input', function() {
-                rotZValue.textContent = this.value;
-                updateModelProperty('rotation', 'z', parseFloat(this.value));
             });
 
             // Scale スライダーのイベント
@@ -228,9 +205,6 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('pos-x').value = defaultValues.position.x;
             document.getElementById('pos-y').value = defaultValues.position.y;
             document.getElementById('pos-z').value = defaultValues.position.z;
-            document.getElementById('rot-x').value = defaultValues.rotation.x;
-            document.getElementById('rot-y').value = defaultValues.rotation.y;
-            document.getElementById('rot-z').value = defaultValues.rotation.z;
             document.getElementById('scale-x').value = defaultValues.scale.x;
             document.getElementById('scale-y').value = defaultValues.scale.y;
             document.getElementById('scale-z').value = defaultValues.scale.z;
@@ -239,9 +213,6 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('pos-x-value').textContent = defaultValues.position.x;
             document.getElementById('pos-y-value').textContent = defaultValues.position.y;
             document.getElementById('pos-z-value').textContent = defaultValues.position.z;
-            document.getElementById('rot-x-value').textContent = defaultValues.rotation.x;
-            document.getElementById('rot-y-value').textContent = defaultValues.rotation.y;
-            document.getElementById('rot-z-value').textContent = defaultValues.rotation.z;
             document.getElementById('scale-x-value').textContent = defaultValues.scale.x;
             document.getElementById('scale-y-value').textContent = defaultValues.scale.y;
             document.getElementById('scale-z-value').textContent = defaultValues.scale.z;
