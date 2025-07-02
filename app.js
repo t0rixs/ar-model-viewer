@@ -419,7 +419,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // デフォルト値に戻す
             const defaults = {
                 position: { x: 0.2, y: 0.7, z: 2.6 },
-                scale: { x: 2.0, y: 2.0, z: 2.0 }
+                scale: { x: 20, y: 20, z: 20 }
             };
 
             // モデルを更新
