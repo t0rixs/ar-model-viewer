@@ -100,3 +100,148 @@ body {
     opacity: 0;
     pointer-events: none;
 }
+
+/* スマホ用メディアクエリ */
+@media screen and (max-width: 768px) {
+    /* タブレット以下 */
+    #instructions {
+        top: 20px;
+        left: 10px;
+        right: 10px;
+        transform: none;
+        padding: 15px;
+        font-size: 14px;
+    }
+
+    #ui-controls {
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        flex-wrap: wrap;
+        justify-content: center;
+        width: 90%;
+        max-width: 400px;
+    }
+
+    #ui-controls button {
+        padding: 12px 20px;
+        font-size: 14px;
+        min-height: 44px; /* タッチ操作に適したサイズ */
+        min-width: 80px;
+    }
+
+    .loading-container h1 {
+        font-size: 24px;
+    }
+
+    .loading-container p {
+        font-size: 16px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    /* スマホ */
+    #instructions {
+        top: 10px;
+        left: 5px;
+        right: 5px;
+        padding: 12px;
+        font-size: 13px;
+        border-radius: 8px;
+    }
+
+    #close-instructions {
+        padding: 8px 16px;
+        font-size: 13px;
+        margin-top: 8px;
+    }
+
+    #ui-controls {
+        bottom: 20px;
+        gap: 8px;
+        width: 95%;
+    }
+
+    #ui-controls button {
+        padding: 10px 16px;
+        font-size: 13px;
+        min-height: 44px;
+        flex: 1;
+        max-width: 120px;
+    }
+
+    .loading-container {
+        padding: 15px;
+    }
+
+    .loading-container h1 {
+        font-size: 20px;
+        margin-bottom: 10px;
+    }
+
+    .loading-container p {
+        font-size: 14px;
+    }
+
+    .loader {
+        width: 40px;
+        height: 40px;
+        margin: 15px auto;
+    }
+}
+
+@media screen and (max-width: 375px) {
+    /* 小さなスマホ */
+    #instructions {
+        font-size: 12px;
+        padding: 10px;
+    }
+
+    #ui-controls button {
+        font-size: 12px;
+        padding: 8px 12px;
+        min-width: 70px;
+    }
+
+    .loading-container h1 {
+        font-size: 18px;
+    }
+
+    .loading-container p {
+        font-size: 13px;
+    }
+}
+
+/* 横向き表示用 */
+@media screen and (max-height: 500px) and (orientation: landscape) {
+    #instructions {
+        top: 5px;
+        font-size: 12px;
+        padding: 8px 12px;
+    }
+
+    #ui-controls {
+        bottom: 10px;
+        gap: 6px;
+    }
+
+    #ui-controls button {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+
+    .loading-container h1 {
+        font-size: 16px;
+        margin-bottom: 5px;
+    }
+
+    .loading-container p {
+        font-size: 12px;
+    }
+
+    .loader {
+        width: 30px;
+        height: 30px;
+        margin: 10px auto;
+    }
+}
