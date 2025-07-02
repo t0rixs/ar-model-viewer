@@ -251,19 +251,18 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // デフォルト値（HTMLの初期値と一致させる）
+        // デフォルト値
         const defaultValues = {
-            position: { x: 0.2, y: 0.7, z: 2.6 },
+            position: { x: 2, y: 0.7, z: 4.4 },
             rotation: { x: 270, y: 0, z: 0 },
             scale: { x: 2, y: 2, z: 2 }
         };
 
-        // 可視領域制御の設定
-        let visibilityControl = {
-            enabled: true,
-            maxDistance: 2.0, // メートル単位
-            isVisible: true,
-            monitoringInterval: null // setIntervalのIDを保存
+        // 可視領域の設定
+        let visibleAreaConfig = {
+            size: 2.0,  // 可視領域のサイズ (m)
+            showBoundary: true,  // 境界表示フラグ
+            monitoringEnabled: true  // 位置監視フラグ
         };
 
         // 折りたたみ機能
@@ -275,16 +274,13 @@ document.addEventListener('DOMContentLoaded', function() {
         // スライダーのイベントリスナーを設定
         setupSliderListeners();
 
-        // 可視領域制御のイベントリスナーを設定
-        setupVisibilityControl();
-
-        // position監視を開始
-        startPositionMonitoring();
-
         // リセットボタンの処理
         resetBtn.addEventListener('click', function() {
             resetToDefaults();
         });
+
+        // 可視領域の初期化
+        initVisibleAreaSystem();
 
         function setupSliderListeners() {
             // Position スライダー
@@ -335,102 +331,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 scaleZValue.textContent = this.value;
                 updateModelProperty('scale', 'z', parseFloat(this.value));
             });
-        }
 
-        function setupVisibilityControl() {
-            const visibilityArea = document.getElementById('visibility-area');
-            const visibilityAreaValue = document.getElementById('visibility-area-value');
-            const enableVisibilityCheck = document.getElementById('enable-visibility-check');
+            // 可視領域コントロールのイベント
+            const visibleAreaSize = document.getElementById('visible-area-size');
+            const visibleAreaValue = document.getElementById('visible-area-value');
+            const showVisibleArea = document.getElementById('show-visible-area');
 
-            if (!visibilityArea || !visibilityAreaValue || !enableVisibilityCheck) {
-                console.log('可視領域制御の要素が見つかりません');
-                return;
+            if (visibleAreaSize && visibleAreaValue) {
+                visibleAreaSize.addEventListener('input', function() {
+                    visibleAreaValue.textContent = this.value;
+                    updateVisibleAreaSize(parseFloat(this.value));
+                });
             }
 
-            // 可視領域サイズスライダー
-            visibilityArea.addEventListener('input', function() {
-                visibilityControl.maxDistance = parseFloat(this.value);
-                visibilityAreaValue.textContent = this.value;
-                console.log('可視領域サイズを変更:', visibilityControl.maxDistance, 'm');
-            });
-
-            // 可視領域制御の有効/無効切り替え
-            enableVisibilityCheck.addEventListener('change', function() {
-                visibilityControl.enabled = this.checked;
-                console.log('可視領域制御:', visibilityControl.enabled ? '有効' : '無効');
-                
-                if (!visibilityControl.enabled) {
-                    // 監視を停止
-                    if (visibilityControl.monitoringInterval) {
-                        clearInterval(visibilityControl.monitoringInterval);
-                        visibilityControl.monitoringInterval = null;
-                        console.log('position監視を停止しました');
-                    }
-                    
-                    // 強制的に表示状態に戻す
-                    arModel.setAttribute('visible', true);
-                    visibilityControl.isVisible = true;
-                    
-                    // 表示を更新
-                    document.getElementById('visibility-status').textContent = '制御無効';
-                    document.getElementById('distance-display').textContent = '-';
-                } else {
-                    // 監視を再開
-                    startPositionMonitoring();
-                }
-            });
-        }
-
-        function startPositionMonitoring() {
-            const distanceDisplay = document.getElementById('distance-display');
-            const visibilityStatus = document.getElementById('visibility-status');
-            
-            if (!distanceDisplay || !visibilityStatus) {
-                console.log('表示要素が見つかりません');
-                return;
+            if (showVisibleArea) {
+                showVisibleArea.addEventListener('change', function() {
+                    toggleVisibleAreaBoundary(this.checked);
+                });
             }
-
-            // 既に監視中の場合は停止してから開始
-            if (visibilityControl.monitoringInterval) {
-                clearInterval(visibilityControl.monitoringInterval);
-                console.log('既存の監視を停止しました');
-            }
-
-            // 定期的にposition監視（60FPS想定で約16ms間隔）
-            visibilityControl.monitoringInterval = setInterval(function() {
-                if (!arModel || !visibilityControl.enabled) return;
-
-                // 現在のposition取得
-                const position = arModel.getAttribute('position');
-                if (!position) return;
-
-                // マーカー中心（原点）からの距離を計算
-                // Y軸は高さなので、XZ平面での距離を計算
-                const distance = Math.sqrt(position.x * position.x + position.z * position.z);
-                
-                // 距離をメートル単位で表示（小数点2桁まで）
-                distanceDisplay.textContent = distance.toFixed(2);
-
-                // 可視領域制御
-                const shouldBeVisible = distance <= visibilityControl.maxDistance;
-                
-                if (shouldBeVisible !== visibilityControl.isVisible) {
-                    visibilityControl.isVisible = shouldBeVisible;
-                    arModel.setAttribute('visible', shouldBeVisible);
-                    
-                    // 状態表示を更新
-                    visibilityStatus.textContent = shouldBeVisible ? '範囲内' : '範囲外';
-                    
-                    console.log(`モデル表示状態変更: ${shouldBeVisible ? '表示' : '非表示'} (距離: ${distance.toFixed(2)}m, 制限: ${visibilityControl.maxDistance}m)`);
-                } else {
-                    // 状態表示だけ更新
-                    if (visibilityControl.enabled) {
-                        visibilityStatus.textContent = shouldBeVisible ? '範囲内' : '範囲外';
-                    }
-                }
-            }, 16); // 約60FPS
-            
-            console.log('position監視を開始しました');
         }
 
         function updateModelProperty(property, axis, value) {
@@ -479,37 +397,21 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('scale-y-value').textContent = defaultValues.scale.y;
             document.getElementById('scale-z-value').textContent = defaultValues.scale.z;
 
-            // 可視領域制御の設定をリセット
-            const visibilityArea = document.getElementById('visibility-area');
-            const visibilityAreaValue = document.getElementById('visibility-area-value');
-            const enableVisibilityCheck = document.getElementById('enable-visibility-check');
+            // 可視領域設定をリセット
+            const visibleAreaSizeSlider = document.getElementById('visible-area-size');
+            const visibleAreaValueSpan = document.getElementById('visible-area-value');
+            const showVisibleAreaCheckbox = document.getElementById('show-visible-area');
             
-            if (visibilityArea && visibilityAreaValue) {
-                visibilityArea.value = 2.0;
-                visibilityAreaValue.textContent = '2.0';
-                visibilityControl.maxDistance = 2.0;
+            if (visibleAreaSizeSlider && visibleAreaValueSpan) {
+                visibleAreaSizeSlider.value = 2.0;
+                visibleAreaValueSpan.textContent = '2.0';
+                updateVisibleAreaSize(2.0);
             }
             
-            if (enableVisibilityCheck) {
-                enableVisibilityCheck.checked = true;
-                visibilityControl.enabled = true;
+            if (showVisibleAreaCheckbox) {
+                showVisibleAreaCheckbox.checked = true;
+                toggleVisibleAreaBoundary(true);
             }
-
-            // 監視を停止してから再開
-            if (visibilityControl.monitoringInterval) {
-                clearInterval(visibilityControl.monitoringInterval);
-                visibilityControl.monitoringInterval = null;
-            }
-
-            // 状態表示をリセット
-            const visibilityStatus = document.getElementById('visibility-status');
-            const distanceDisplay = document.getElementById('distance-display');
-            if (visibilityStatus) visibilityStatus.textContent = '範囲内';
-            if (distanceDisplay) distanceDisplay.textContent = '0.0';
-
-            // モデルを表示状態に戻す
-            arModel.setAttribute('visible', true);
-            visibilityControl.isVisible = true;
 
             // 3Dモデルを初期状態に戻す（文字列形式で設定）
             arModel.setAttribute('position', `${defaultValues.position.x} ${defaultValues.position.y} ${defaultValues.position.z}`);
@@ -521,14 +423,84 @@ document.addEventListener('DOMContentLoaded', function() {
             arModel.setAttribute('rotation', defaultValues.rotation);
             arModel.setAttribute('scale', defaultValues.scale);
             
-            // 監視を再開（少し遅延させてモデルの設定が反映されるのを待つ）
-            setTimeout(() => {
-                if (visibilityControl.enabled) {
-                    startPositionMonitoring();
+            console.log('モデルをリセットしました');
+        }
+
+        // 可視領域システムの初期化
+        function initVisibleAreaSystem() {
+            console.log('可視領域システムを初期化中...');
+            
+            // 可視領域境界要素を取得
+            const visibleAreaBoundary = document.getElementById('visible-area-boundary');
+            if (!visibleAreaBoundary) {
+                console.error('可視領域境界要素が見つかりません');
+                return;
+            }
+
+            // ar-modelの位置監視を開始
+            startPositionMonitoring();
+            
+            console.log('可視領域システムが初期化されました');
+        }
+
+        // 可視領域サイズの更新
+        function updateVisibleAreaSize(newSize) {
+            visibleAreaConfig.size = newSize;
+            console.log('可視領域サイズを更新:', newSize + 'm');
+            
+            // 境界表示要素のサイズを更新
+            const visibleAreaBoundary = document.getElementById('visible-area-boundary');
+            if (visibleAreaBoundary) {
+                visibleAreaBoundary.setAttribute('width', newSize);
+                visibleAreaBoundary.setAttribute('height', newSize);
+            }
+        }
+
+        // 可視領域境界の表示/非表示切り替え
+        function toggleVisibleAreaBoundary(show) {
+            visibleAreaConfig.showBoundary = show;
+            const visibleAreaBoundary = document.getElementById('visible-area-boundary');
+            if (visibleAreaBoundary) {
+                visibleAreaBoundary.setAttribute('visible', show);
+                console.log('可視領域境界表示:', show ? 'オン' : 'オフ');
+            }
+        }
+
+        // ar-modelの位置監視を開始
+        function startPositionMonitoring() {
+            console.log('位置監視を開始します');
+            
+            // 100msごとに位置をチェック
+            setInterval(function() {
+                if (visibleAreaConfig.monitoringEnabled) {
+                    checkModelVisibility();
                 }
             }, 100);
+        }
+
+        // ar-modelの可視性をチェック
+        function checkModelVisibility() {
+            const arModel = document.getElementById('ar-model');
+            if (!arModel) return;
             
-            console.log('モデルをリセットしました');
+            // モデルの現在位置を取得
+            const position = arModel.getAttribute('position');
+            if (!position) return;
+            
+            // マーカー中心（0,0）からの距離を計算（XZ平面）
+            const distanceFromCenter = Math.sqrt(position.x * position.x + position.z * position.z);
+            const halfAreaSize = visibleAreaConfig.size / 2;
+            
+            // 可視領域内かどうかを判定
+            const isVisible = distanceFromCenter <= halfAreaSize;
+            
+            // モデルの可視性を更新
+            if (arModel.getAttribute('visible') !== isVisible) {
+                arModel.setAttribute('visible', isVisible);
+                console.log('モデル可視性変更:', isVisible ? '表示' : '非表示', 
+                           '距離:', distanceFromCenter.toFixed(2) + 'm', 
+                           '領域:', halfAreaSize.toFixed(2) + 'm');
+            }
         }
     }
 });

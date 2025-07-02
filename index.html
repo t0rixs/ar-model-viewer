@@ -38,6 +38,16 @@
         <!-- デフォルトの3Dモデル（赤い箱） -->
          <a-marker preset="hiro">
             <a-entity id="ar-model" position="0.2 0.7 2.6" rotation="270 0 0" scale="2 2 2" gltf-model="./models/poop.glb"></a-entity>
+            <!-- 可視領域の境界を表示するための平面 -->
+            <a-plane id="visible-area-boundary" 
+                     position="0 0.01 0" 
+                     rotation="-90 0 0" 
+                     width="2" 
+                     height="2" 
+                     color="rgba(0, 255, 0, 0.2)" 
+                     material="transparent: true; opacity: 0.2; side: double"
+                     visible="true">
+            </a-plane>
          </a-marker>
     </a-scene>
 
@@ -51,16 +61,16 @@
             <div class="control-group">
                 <h4>Position</h4>
                 <div class="slider-group">
-                    <label>X: <span id="pos-x-value">0.2</span></label>
-                    <input type="range" id="pos-x" min="-10" max="10" step="0.1" value="0.2">
+                    <label>X: <span id="pos-x-value">2</span></label>
+                    <input type="range" id="pos-x" min="-10" max="10" step="0.1" value="2">
                 </div>
                 <div class="slider-group">
                     <label>Y: <span id="pos-y-value">0.7</span></label>
                     <input type="range" id="pos-y" min="-10" max="10" step="0.1" value="0.7">
                 </div>
                 <div class="slider-group">
-                    <label>Z: <span id="pos-z-value">2.6</span></label>
-                    <input type="range" id="pos-z" min="-10" max="10" step="0.1" value="2.6">
+                    <label>Z: <span id="pos-z-value">4.4</span></label>
+                    <input type="range" id="pos-z" min="-10" max="10" step="0.1" value="4.4">
                 </div>
             </div>
 
@@ -81,22 +91,21 @@
                 </div>
             </div>
 
-            <!-- Visibility Area Controls -->
+            <!-- Visible Area Controls -->
             <div class="control-group">
-                <h4>可視領域</h4>
+                <h4>可視領域設定</h4>
                 <div class="slider-group">
-                    <label>領域サイズ: <span id="visibility-area-value">2.0</span>m</label>
-                    <input type="range" id="visibility-area" min="0.5" max="10" step="0.1" value="2.0">
+                    <label>領域サイズ: <span id="visible-area-value">2.0</span>m</label>
+                    <input type="range" id="visible-area-size" min="0.5" max="10" step="0.1" value="2.0">
                 </div>
-                <div class="slider-group">
+                <div class="checkbox-group">
                     <label>
-                        <input type="checkbox" id="enable-visibility-check" checked>
-                        可視領域チェックを有効にする
+                        <input type="checkbox" id="show-visible-area" checked>
+                        可視領域を表示
                     </label>
                 </div>
-                <div class="info-display">
-                    <small>現在の状態: <span id="visibility-status">範囲内</span></small><br>
-                    <small>距離: <span id="distance-display">0.0</span>m</small>
+                <div class="info-group">
+                    <small>マーカー中心から指定した範囲外のオブジェクトは非表示になります</small>
                 </div>
             </div>
 
