@@ -257,34 +257,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        function updateModelProperty(property, axis, value) {
-            const currentProperty = arModel.getAttribute(property);
-            console.log(`更新前の${property}:`, currentProperty);
-            
-            // 現在の値を取得
-            let x = currentProperty.x || 0;
-            let y = currentProperty.y || 0;
-            let z = currentProperty.z || 0;
-            
-            // 指定された軸の値を更新
-            if (axis === 'x') x = value;
-            if (axis === 'y') y = value;
-            if (axis === 'z') z = value;
-            
-            // 文字列形式で設定（A-Frameで確実に動作する方法）
-            const propertyString = `${x} ${y} ${z}`;
-            console.log(`設定する${property}文字列:`, propertyString);
-            
-            // 両方の方法で設定を試す
-            arModel.setAttribute(property, propertyString);
-            arModel.setAttribute(property, {x: x, y: y, z: z});
-            
-            // 更新が反映されたかを確認
-            setTimeout(() => {
-                const updatedProperty = arModel.getAttribute(property);
-                console.log(`実際の${property}:`, updatedProperty);
-            }, 100);
-        }
+
 
         function resetToDefaults() {
             // スライダーの値をリセット
@@ -317,6 +290,53 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // グローバル関数: モデルプロパティの更新
+    function updateModelProperty(property, axis, value) {
+        const arModel = document.getElementById('ar-model');
+        if (!arModel) {
+            console.error('ARモデルが見つかりません');
+            return;
+        }
+        
+        try {
+            const currentProperty = arModel.getAttribute(property);
+            console.log(`更新前の${property}:`, currentProperty);
+            
+            // 現在の値を取得（デフォルト値も設定）
+            let x = (currentProperty && currentProperty.x !== undefined) ? currentProperty.x : 0;
+            let y = (currentProperty && currentProperty.y !== undefined) ? currentProperty.y : 0;
+            let z = (currentProperty && currentProperty.z !== undefined) ? currentProperty.z : 0;
+            
+            // 指定された軸の値を更新
+            if (axis === 'x') x = value;
+            if (axis === 'y') y = value;
+            if (axis === 'z') z = value;
+            
+            // 文字列形式で設定（A-Frameで確実に動作する方法）
+            const propertyString = `${x} ${y} ${z}`;
+            console.log(`設定する${property}文字列:`, propertyString);
+            
+            // 属性を設定
+            arModel.setAttribute(property, propertyString);
+            
+            // 更新が反映されたかを確認
+            setTimeout(() => {
+                const updatedProperty = arModel.getAttribute(property);
+                console.log(`実際の${property}:`, updatedProperty);
+                
+                // 更新が成功したかチェック
+                if (updatedProperty && updatedProperty[axis] === value) {
+                    console.log(`✅ ${property}.${axis} = ${value} 更新成功`);
+                } else {
+                    console.warn(`⚠️ ${property}.${axis} = ${value} 更新失敗`, updatedProperty);
+                }
+            }, 100);
+            
+        } catch (error) {
+            console.error('updateModelProperty エラー:', error);
+        }
+    }
+
     // スマホ用コントロールパネルの初期化
     function initMobileControls() {
         const isMobile = window.innerWidth <= 1023;
@@ -341,6 +361,14 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('モバイルコントロール要素が見つかりません');
             return;
         }
+
+        console.log('モバイルコントロール要素が正常に取得されました:', {
+            toggleBtn: !!toggleBtn,
+            controlPanel: !!controlPanel,
+            closeBtn: !!closeBtn,
+            resetBtn: !!resetBtn,
+            hideBtn: !!hideBtn
+        });
 
         // パネルの開閉機能
         toggleBtn.addEventListener('click', function() {
@@ -411,6 +439,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         // 表示/非表示切り替え
+        hideBtn.textContent = '非表示'; // 初期状態は「非表示」ボタン
+        hideBtn.style.background = '#e74c3c'; // 赤色
+        
         hideBtn.addEventListener('click', function() {
             modelVisible = !modelVisible;
             arModel.setAttribute('visible', modelVisible);
@@ -424,10 +455,16 @@ document.addEventListener('DOMContentLoaded', function() {
             const slider = document.getElementById(sliderId);
             const valueSpan = document.getElementById(valueId);
             
-            if (!slider || !valueSpan) return;
+            if (!slider || !valueSpan) {
+                console.warn(`スライダー要素が見つかりません: ${sliderId}, ${valueId}`);
+                return;
+            }
+
+            console.log(`スライダー設定: ${sliderId} -> ${property}.${axis}`);
 
             slider.addEventListener('input', function() {
                 const value = parseFloat(this.value);
+                console.log(`スライダー変更: ${sliderId} = ${value}`);
                 valueSpan.textContent = value.toFixed(1);
                 updateModelProperty(property, axis, value);
             });
@@ -443,6 +480,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 valueSpan.textContent = value.toFixed(1);
             }
         }
+
+        // 現在のモデル状態を確認
+        const currentPosition = arModel.getAttribute('position');
+        const currentScale = arModel.getAttribute('scale');
+        
+        console.log('現在のモデル状態:', {
+            position: currentPosition,
+            scale: currentScale,
+            visible: arModel.getAttribute('visible')
+        });
 
         console.log('スマホ用コントロールパネルの初期化完了');
     }
