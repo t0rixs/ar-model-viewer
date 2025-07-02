@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
     <meta name="theme-color" content="#317EFB"/>
     <!-- キャッシュを無効化するためのメタタグ -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -28,9 +28,10 @@
         <button id="close-instructions">閉じる</button>
     </div>
 
-    <a-scene embedded arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
+    <a-scene embedded arjs="trackingMethod: best; sourceType: webcam; sourceWidth: 1280; sourceHeight: 720; displayWidth: 1280; displayHeight: 720; debugUIEnabled: false;"
              renderer="logarithmicDepthBuffer: true; antialias: true; precision: mediump;"
-             vr-mode-ui="enabled: false">
+             vr-mode-ui="enabled: false"
+             style="width: 100vw; height: 100vh; position: fixed; top: 0; left: 0;">
         <!-- カメラ -->
         <a-entity camera></a-entity>
         
