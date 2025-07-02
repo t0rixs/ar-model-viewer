@@ -7,6 +7,16 @@
 body {
     font-family: Arial, sans-serif;
     overflow: hidden;
+    position: relative;
+}
+
+/* A-Frame canvas の調整 */
+a-scene {
+    pointer-events: auto;
+}
+
+a-scene canvas {
+    pointer-events: auto;
 }
 
 /* ローディング画面 */
@@ -253,18 +263,27 @@ body {
 
 @media screen and (min-width: 1024px) {
     .debug-panel {
-        display: block;
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        width: 300px;
-        background-color: rgba(0, 0, 0, 0.9);
-        color: white;
-        border-radius: 10px;
-        padding: 15px;
-        z-index: 100;
-        font-size: 14px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        display: block !important;
+        position: fixed !important;
+        top: 20px !important;
+        right: 20px !important;
+        bottom: auto !important;
+        left: auto !important;
+        width: 300px !important;
+        height: auto !important;
+        background-color: rgba(0, 0, 0, 0.95) !important;
+        color: white !important;
+        border-radius: 10px !important;
+        padding: 15px !important;
+        z-index: 99999 !important;
+        font-size: 14px !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5) !important;
+        pointer-events: auto !important;
+        transform: translateZ(0) !important;
+        -webkit-transform: translateZ(0) !important;
+        margin: 0 !important;
+        float: none !important;
+        clear: none !important;
     }
 
     .debug-panel h3 {

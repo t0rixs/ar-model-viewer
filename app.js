@@ -51,11 +51,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // デバッグパネルの初期化（PC限定）
     function initDebugPanel() {
+        console.log('画面幅:', window.innerWidth, 'px');
+        
         // PC画面でない場合は何もしない
-        if (window.innerWidth < 1024) return;
+        if (window.innerWidth < 1024) {
+            console.log('画面幅が1024px未満のため、デバッグパネルは表示されません');
+            return;
+        }
 
+        console.log('デバッグパネルを初期化中...');
+        
         const arModel = document.getElementById('ar-model');
-        if (!arModel) return;
+        if (!arModel) {
+            console.log('ARモデルが見つかりません');
+            return;
+        }
+        
+        console.log('ARモデルが見つかりました:', arModel);
 
         // デバッグコントロールの要素を取得
         const debugPanel = document.getElementById('debug-panel');
