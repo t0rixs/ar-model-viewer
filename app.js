@@ -12,8 +12,10 @@ document.addEventListener('DOMContentLoaded', function() {
     scene.addEventListener('loaded', function () {
         setTimeout(() => {
             loadingScreen.classList.add('hidden');
-            // デバッグパネルの初期化（PC限定）
-            initDebugPanel();
+            // デバッグパネルの初期化（PC限定）- 少し遅延させてエンティティが確実に読み込まれるのを待つ
+            setTimeout(() => {
+                initDebugPanel();
+            }, 500);
         }, 1000);
     });
 
@@ -69,11 +71,33 @@ document.addEventListener('DOMContentLoaded', function() {
         
         console.log('ARモデルが見つかりました:', arModel);
 
+        // モデルが読み込まれているかチェック
+        if (arModel.hasLoaded) {
+            console.log('モデルは既に読み込まれています');
+        } else {
+            console.log('モデルの読み込みを待っています...');
+            arModel.addEventListener('model-loaded', function() {
+                console.log('モデルが読み込まれました');
+            });
+        }
+
         // デバッグコントロールの要素を取得
         const debugPanel = document.getElementById('debug-panel');
         const toggleDebugBtn = document.getElementById('toggle-debug');
         const debugControls = document.getElementById('debug-controls');
         const resetBtn = document.getElementById('reset-model');
+
+        console.log('デバッグパネル要素:', {
+            debugPanel: debugPanel,
+            toggleDebugBtn: toggleDebugBtn,
+            debugControls: debugControls,
+            resetBtn: resetBtn
+        });
+
+        if (!debugPanel || !toggleDebugBtn || !debugControls || !resetBtn) {
+            console.error('デバッグパネルの要素が見つかりません');
+            return;
+        }
 
         // デフォルト値
         const defaultValues = {
@@ -172,8 +196,31 @@ document.addEventListener('DOMContentLoaded', function() {
 
         function updateModelProperty(property, axis, value) {
             const currentProperty = arModel.getAttribute(property);
-            currentProperty[axis] = value;
-            arModel.setAttribute(property, currentProperty);
+            console.log(`更新前の${property}:`, currentProperty);
+            
+            // 現在の値を取得
+            let x = currentProperty.x || 0;
+            let y = currentProperty.y || 0;
+            let z = currentProperty.z || 0;
+            
+            // 指定された軸の値を更新
+            if (axis === 'x') x = value;
+            if (axis === 'y') y = value;
+            if (axis === 'z') z = value;
+            
+            // 文字列形式で設定（A-Frameで確実に動作する方法）
+            const propertyString = `${x} ${y} ${z}`;
+            console.log(`設定する${property}文字列:`, propertyString);
+            
+            // 両方の方法で設定を試す
+            arModel.setAttribute(property, propertyString);
+            arModel.setAttribute(property, {x: x, y: y, z: z});
+            
+            // 更新が反映されたかを確認
+            setTimeout(() => {
+                const updatedProperty = arModel.getAttribute(property);
+                console.log(`実際の${property}:`, updatedProperty);
+            }, 100);
         }
 
         function resetToDefaults() {
@@ -199,10 +246,17 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('scale-y-value').textContent = defaultValues.scale.y;
             document.getElementById('scale-z-value').textContent = defaultValues.scale.z;
 
-            // 3Dモデルを初期状態に戻す
+            // 3Dモデルを初期状態に戻す（文字列形式で設定）
+            arModel.setAttribute('position', `${defaultValues.position.x} ${defaultValues.position.y} ${defaultValues.position.z}`);
+            arModel.setAttribute('rotation', `${defaultValues.rotation.x} ${defaultValues.rotation.y} ${defaultValues.rotation.z}`);
+            arModel.setAttribute('scale', `${defaultValues.scale.x} ${defaultValues.scale.y} ${defaultValues.scale.z}`);
+            
+            // オブジェクト形式でも設定
             arModel.setAttribute('position', defaultValues.position);
             arModel.setAttribute('rotation', defaultValues.rotation);
             arModel.setAttribute('scale', defaultValues.scale);
+            
+            console.log('モデルをリセットしました');
         }
     }
 });
