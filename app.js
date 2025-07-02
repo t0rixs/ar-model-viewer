@@ -509,19 +509,19 @@ document.addEventListener('DOMContentLoaded', function() {
             const position = arModel.getAttribute('position');
             if (!position) return;
             
-            // マーカー中心（0,0）からの距離を計算（XZ平面）
-            const distanceFromCenter = Math.sqrt(position.x * position.x + position.z * position.z);
+            // マーカー中心を基準とした正方形領域内かどうかを判定（XZ平面）
             const halfAreaSize = visibleAreaConfig.size / 2;
-            
-            // 可視領域内かどうかを判定
-            const isVisible = distanceFromCenter <= halfAreaSize;
+            const isVisible =
+                Math.abs(position.x) <= halfAreaSize &&
+                Math.abs(position.z) <= halfAreaSize;
             
             // モデルの可視性を更新
             if (arModel.getAttribute('visible') !== isVisible) {
                 arModel.setAttribute('visible', isVisible);
                 console.log('モデル可視性変更:', isVisible ? '表示' : '非表示', 
-                           '距離:', distanceFromCenter.toFixed(2) + 'm', 
-                           '領域:', halfAreaSize.toFixed(2) + 'm');
+                           'X:', position.x.toFixed(2) + 'm', 
+                           'Z:', position.z.toFixed(2) + 'm',
+                           '正方形半径:', halfAreaSize.toFixed(2) + 'm');
             }
         }
     }
