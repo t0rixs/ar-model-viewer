@@ -39,11 +39,19 @@ document.addEventListener('DOMContentLoaded', function() {
         scene.addEventListener('renderstart', function() {
             console.log('A-Frame renderstart イベント');
             setTimeout(debugScreenSize, 100);
+            // スマホの場合、スタイルを強制適用
+            if (window.innerWidth <= 768) {
+                setTimeout(forceApplyMobileStyles, 200);
+            }
         });
         
         scene.addEventListener('loaded', function() {
             console.log('A-Frame loaded イベント');
             setTimeout(debugScreenSize, 100);
+            // スマホの場合、スタイルを強制適用
+            if (window.innerWidth <= 768) {
+                setTimeout(forceApplyMobileStyles, 200);
+            }
         });
     }
 
@@ -277,4 +285,62 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('モデルをリセットしました');
         }
     }
+
+    // スマホ用スタイルを強制的に適用する関数
+    function forceApplyMobileStyles() {
+        console.log('スマホ用スタイルを強制適用中...');
+        
+        const canvases = document.querySelectorAll('canvas, a-scene canvas, canvas[data-aframe-canvas="true"]');
+        const scenes = document.querySelectorAll('a-scene');
+        
+        canvases.forEach(canvas => {
+            canvas.style.setProperty('width', '100vw', 'important');
+            canvas.style.setProperty('height', '100vh', 'important');
+            canvas.style.setProperty('position', 'fixed', 'important');
+            canvas.style.setProperty('top', '0', 'important');
+            canvas.style.setProperty('left', '0', 'important');
+            canvas.style.setProperty('right', '0', 'important');
+            canvas.style.setProperty('bottom', '0', 'important');
+            canvas.style.setProperty('object-fit', 'cover', 'important');
+            canvas.style.setProperty('object-position', 'center', 'important');
+            canvas.style.setProperty('transform', 'none', 'important');
+            canvas.style.setProperty('margin', '0', 'important');
+            canvas.style.setProperty('padding', '0', 'important');
+            canvas.style.setProperty('max-width', '100vw', 'important');
+            canvas.style.setProperty('max-height', '100vh', 'important');
+            canvas.style.setProperty('min-width', '100vw', 'important');
+            canvas.style.setProperty('min-height', '100vh', 'important');
+        });
+        
+        scenes.forEach(scene => {
+            scene.style.setProperty('width', '100vw', 'important');
+            scene.style.setProperty('height', '100vh', 'important');
+            scene.style.setProperty('position', 'fixed', 'important');
+            scene.style.setProperty('top', '0', 'important');
+            scene.style.setProperty('left', '0', 'important');
+            scene.style.setProperty('overflow', 'hidden', 'important');
+        });
+        
+        console.log('スマホ用スタイル強制適用完了');
+    }
+
+    // MutationObserverでcanvas要素の追加を監視
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'childList' && window.innerWidth <= 768) {
+                mutation.addedNodes.forEach(function(node) {
+                    if (node.tagName === 'CANVAS' || (node.querySelector && node.querySelector('canvas'))) {
+                        console.log('新しいcanvas要素が検出されました');
+                        setTimeout(forceApplyMobileStyles, 50);
+                    }
+                });
+            }
+        });
+    });
+
+    // body全体を監視
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
 });
