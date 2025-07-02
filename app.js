@@ -251,9 +251,9 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // デフォルト値
+        // デフォルト値（HTMLの初期値と一致させる）
         const defaultValues = {
-            position: { x: 2, y: 0.7, z: 4.4 },
+            position: { x: 0.2, y: 0.7, z: 2.6 },
             rotation: { x: 270, y: 0, z: 0 },
             scale: { x: 2, y: 2, z: 2 }
         };
@@ -262,7 +262,8 @@ document.addEventListener('DOMContentLoaded', function() {
         let visibilityControl = {
             enabled: true,
             maxDistance: 2.0, // メートル単位
-            isVisible: true
+            isVisible: true,
+            monitoringInterval: null // setIntervalのIDを保存
         };
 
         // 折りたたみ機能
@@ -358,11 +359,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 visibilityControl.enabled = this.checked;
                 console.log('可視領域制御:', visibilityControl.enabled ? '有効' : '無効');
                 
-                // 無効にした場合は強制的に表示
                 if (!visibilityControl.enabled) {
+                    // 監視を停止
+                    if (visibilityControl.monitoringInterval) {
+                        clearInterval(visibilityControl.monitoringInterval);
+                        visibilityControl.monitoringInterval = null;
+                        console.log('position監視を停止しました');
+                    }
+                    
+                    // 強制的に表示状態に戻す
                     arModel.setAttribute('visible', true);
                     visibilityControl.isVisible = true;
+                    
+                    // 表示を更新
                     document.getElementById('visibility-status').textContent = '制御無効';
+                    document.getElementById('distance-display').textContent = '-';
+                } else {
+                    // 監視を再開
+                    startPositionMonitoring();
                 }
             });
         }
@@ -376,8 +390,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
+            // 既に監視中の場合は停止してから開始
+            if (visibilityControl.monitoringInterval) {
+                clearInterval(visibilityControl.monitoringInterval);
+                console.log('既存の監視を停止しました');
+            }
+
             // 定期的にposition監視（60FPS想定で約16ms間隔）
-            setInterval(function() {
+            visibilityControl.monitoringInterval = setInterval(function() {
                 if (!arModel || !visibilityControl.enabled) return;
 
                 // 現在のposition取得
@@ -409,6 +429,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
             }, 16); // 約60FPS
+            
+            console.log('position監視を開始しました');
         }
 
         function updateModelProperty(property, axis, value) {
@@ -473,11 +495,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 visibilityControl.enabled = true;
             }
 
+            // 監視を停止してから再開
+            if (visibilityControl.monitoringInterval) {
+                clearInterval(visibilityControl.monitoringInterval);
+                visibilityControl.monitoringInterval = null;
+            }
+
             // 状態表示をリセット
             const visibilityStatus = document.getElementById('visibility-status');
             const distanceDisplay = document.getElementById('distance-display');
             if (visibilityStatus) visibilityStatus.textContent = '範囲内';
             if (distanceDisplay) distanceDisplay.textContent = '0.0';
+
+            // モデルを表示状態に戻す
+            arModel.setAttribute('visible', true);
+            visibilityControl.isVisible = true;
 
             // 3Dモデルを初期状態に戻す（文字列形式で設定）
             arModel.setAttribute('position', `${defaultValues.position.x} ${defaultValues.position.y} ${defaultValues.position.z}`);
@@ -488,6 +520,13 @@ document.addEventListener('DOMContentLoaded', function() {
             arModel.setAttribute('position', defaultValues.position);
             arModel.setAttribute('rotation', defaultValues.rotation);
             arModel.setAttribute('scale', defaultValues.scale);
+            
+            // 監視を再開（少し遅延させてモデルの設定が反映されるのを待つ）
+            setTimeout(() => {
+                if (visibilityControl.enabled) {
+                    startPositionMonitoring();
+                }
+            }, 100);
             
             console.log('モデルをリセットしました');
         }
