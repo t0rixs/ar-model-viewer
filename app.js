@@ -189,7 +189,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const defaultValues = {
             position: { x: 2, y: 0.7, z: 4.4 },
             rotation: { x: 270, y: 0, z: 0 },
-            scale: { x: 2, y: 2, z: 2 }
+            scale: { x: 20, y: 20, z: 20 }
         };
 
         // 折りたたみ機能
